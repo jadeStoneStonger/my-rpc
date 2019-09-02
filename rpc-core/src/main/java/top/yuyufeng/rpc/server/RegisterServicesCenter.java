@@ -16,16 +16,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author yuyufeng
  */
 public class RegisterServicesCenter {
-    private static String zookeeperHost;
+    private static String zookeeperAddress;
     private static ZooKeeper zookeeper;
     private static int TIME_OUT = 10000;
     private static String localIp;
 
-    public static void init(String zookeeperHost, int localPort) {
-        RegisterServicesCenter.zookeeperHost = zookeeperHost;
+    public static void init(String zookeeperAddress, int localPort) {
+        RegisterServicesCenter.zookeeperAddress = zookeeperAddress;
         try {
-            zookeeper = new ZooKeeper(zookeeperHost, TIME_OUT, null);
-
+            zookeeper = new ZooKeeper(zookeeperAddress, TIME_OUT, null);
             //提供层的ip,这里存放本机的ip
             localIp = InetAddress.getLocalHost().getHostAddress() + ":" + localPort;
         } catch (IOException e) {
@@ -68,12 +67,12 @@ public class RegisterServicesCenter {
             byte[] ipsBytes = zookeeper.getData("/myrpc/" + className, false, null);
 
             String ips = new String(ipsBytes);
-            ips += ";"+localIp;
+            ips += ";" + localIp;
 
             //把当前服务的ip地址存如zookeeper中,供消费者-发现
             zookeeper.setData("/myrpc/" + className, ips.getBytes(), -1);
             ipsBytes = zookeeper.getData("/myrpc/" + className, false, null);
-            System.out.println("服务：" + className + " " + new String(ipsBytes)+" 注册完成");
+            System.out.println("服务：" + className + " " + new String(ipsBytes) + " 注册完成");
 
         } catch (KeeperException e) {
             e.printStackTrace();
